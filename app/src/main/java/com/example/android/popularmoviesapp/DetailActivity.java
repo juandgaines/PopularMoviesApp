@@ -78,8 +78,6 @@ public class DetailActivity extends AppCompatActivity {
                 Picasso.with(this)
                         .load(MovieData.BASE_LINK +mPathStr)
                         .resize(600,1000)
-                        //I used both cases because with placeholder is not depicting any image
-
                         .centerInside()
                         .into(mMoviePostDisplay);
             }
@@ -87,7 +85,6 @@ public class DetailActivity extends AppCompatActivity {
                 Picasso.with(this)
                         .load(R.drawable.not_found)
                         .resize(600,800)
-
                         .into(mMoviePostDisplay);
             }
 

@@ -129,35 +129,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         protected List<MovieData> doInBackground(String... strings) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-            // Will contain the raw JSON response as a string.
+
             String movieJsonStr = null;
             try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are avaiable at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
 
                 SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
                 String sort = sharedPrefs.getString(getString(R.string.pref_order_key),
                         getString(R.string.pref_order_defalult));
 
-                /*SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-                    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-                        mMovieData.clear();
-                        mMovieAdapter.notifyDataSetChanged();
-
-                    }
-                };*//*
-
-                sharedPrefs.registerOnSharedPreferenceChangeListener(listener);*/
-
 
                 String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
-                //String sort="popularity.desc";
-                //vote_average.desc
-
-
-
-
 
                 final String FORECAST_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
 
@@ -181,30 +162,27 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
-                    // Nothing to do.
+
                     return null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
+
                     buffer.append(line + "\n");
                 }
                 if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
+
                     return null;
                 }
                 movieJsonStr = buffer.toString();
 
-                // Log.v(LOG_TAG, "Cadena" + movieJsonStr);
+
 
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
+
                 return null;
             } finally {
                 if (urlConnection != null) {
@@ -266,12 +244,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                         posterPath);
 
                 temp.add(objetoTemporal);
-                //Resultados.add(0,objetoTemporal);
-                //Log.v(LOG_TAG,"Title: "+ originalTitle);
-                //Log.v(LOG_TAG,"overview: "+ overview);
-                //Log.v(LOG_TAG,"Vote: "+voteAverage);
-                //Log.v(LOG_TAG,"Release: "+releaseDate);
-                //Log.v(LOG_TAG,"Post: "+ posterPath);
+
             }
 
 
@@ -309,12 +282,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+
         if (id == R.id.action_settings) {
             Intent startIntentSettings = new Intent(this, SettingsActivity.class);
             startActivity(startIntentSettings);
