@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">PopularMoviesApp</string>
+    <string name="error_message">Unable to load data. Please try later.</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_details">Details</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="rate_title">Rate:</string>
+    <string name="overview_title">Overview:</string>
+    <string name="release_title">Release date:</string>
+
+    <string name="error_date_message">Release date not available</string>
+    <string name="error_rate_message">Rate not available</string>
+    <string name="error_overview_message">Overview not available</string>
+
+    <string name="pref_order_type"> Search preferences</string>
+
+    <string name="pref_order_key" translatable="false">Order</string>
+    <string name="pref_order_defalult" translatable="false">popular</string>
+
+    <string-array name="pref_order_movies">
+        <item>Most populars</item>
+        <item>Best rated</item>
+
+    </string-array>
+    <string-array name="pref_order_peliculas_values">
+        <item>popular</item>
+        <item>top_rated</item>
+
+    </string-array>
+
+</resources>
