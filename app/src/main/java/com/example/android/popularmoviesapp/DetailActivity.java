@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Property;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,42 +12,41 @@ import com.squareup.picasso.Picasso;
 
 import com.example.android.popularmoviesapp.MovieData;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class DetailActivity extends AppCompatActivity {
     private static final String LOG_TAG= DetailActivity.class.getName().toString();
-    private TextView mMovieTitleDisplay;
-    private TextView mMovieOverviewDisplay;
-    private TextView mMovieRateDisplay;
-    private TextView mMovieReleaseDisplay;
-    private ImageView mMoviePostDisplay;
+    @BindView(R.id.name_movie) TextView mMovieTitleDisplay;
+    @BindView(R.id.Overview_view)  TextView mMovieOverviewDisplay;
+    @BindView(R.id.rate_view)  TextView mMovieRateDisplay;
+    @BindView(R.id.date_view)  TextView mMovieReleaseDisplay;
+    @BindView(R.id.movie_picture)  ImageView mMoviePostDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        ButterKnife.bind(this);
         Intent intent=getIntent();
 
 
-        if(intent!=null && intent.hasExtra(MovieData.ID_TITLE)
-                && intent.hasExtra(MovieData.ID_OVERVIEW)
-                && intent.hasExtra(MovieData.ID_RATE)
-                && intent.hasExtra(MovieData.ID_RELEASE)
-                && intent.hasExtra(MovieData.ID_PATH)){
-            String mTitleStr;
-            String mPathStr;
-            String mOverviewStr;
-            String mRateStr;
-            String mDateStr;
-            mTitleStr =intent.getStringExtra(MovieData.ID_TITLE);
+        if(intent!=null && intent.hasExtra(MovieData.PARCELABLE)){
+
+            MovieData movieData = intent.getParcelableExtra(MovieData.PARCELABLE);
+            String mTitleStr =movieData.getTitle();
+            String mPathStr=movieData.getPath();
+            String mOverviewStr=movieData.getOverview();
+            String mRateStr= movieData.getRate();
+            String mDateStr=movieData.getRelease();
+
+            /*mTitleStr =intent.getStringExtra(MovieData.ID_TITLE);
             mPathStr=intent.getStringExtra(MovieData.ID_PATH);
             mDateStr=intent.getStringExtra(MovieData.ID_RELEASE);
             mRateStr=intent.getStringExtra(MovieData.ID_RATE);
-            mOverviewStr=intent.getStringExtra(MovieData.ID_OVERVIEW);
+            mOverviewStr=intent.getStringExtra(MovieData.ID_OVERVIEW);*/
 
-            mMovieTitleDisplay= (TextView)findViewById(R.id.name_movie);
-            mMovieReleaseDisplay= (TextView)findViewById(R.id.date_view);
-            mMovieRateDisplay=(TextView)findViewById(R.id.rate_view);
-            mMovieOverviewDisplay=(TextView)findViewById(R.id.Overview_view);
-            mMoviePostDisplay =(ImageView)findViewById(R.id.movie_picture);
+
 
 
             mMovieTitleDisplay.setText(mTitleStr);

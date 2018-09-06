@@ -13,6 +13,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+
 
 public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
@@ -36,6 +38,7 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
 
         public MovieViewHolder(@NonNull View itemView) {
             super(itemView);
+
             mMoviePosterView= (ImageView) itemView.findViewById(R.id.tv_movie_image);
             itemView.setOnClickListener(this);
         }

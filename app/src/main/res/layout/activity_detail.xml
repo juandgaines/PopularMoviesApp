@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="16dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="16dp"
     android:background="#333333"
@@ -19,12 +21,13 @@
             android:orientation="vertical"
             android:background="#333333">
 
-            <TextView  android:layout_width="match_parent"
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/name_movie"
                 android:layout_gravity="center"
                 android:gravity="left"
-                app:autoSizeTextType="uniform"
+                android:autoSizeTextType="uniform"
                 android:maxLines="2"
                 android:fontFamily="sans-serif"
                 android:textStyle="italic|bold"
@@ -104,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Overview"
+                tools:text="Overview"
                 android:layout_marginTop="8dp"
                 android:textColor="@android:color/white"
                 android:id="@+id/Overview_view" />

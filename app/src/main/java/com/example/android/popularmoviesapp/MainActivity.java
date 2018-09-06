@@ -32,25 +32,27 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
     public static final String LOG_TAG=MainActivity.class.getName().toString();
 
 
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.my_recycler_view)  RecyclerView mRecyclerView;
     private MovieAdapter mMovieAdapter;
-    private ProgressBar mLoadingIndicator;
-    private TextView mErrorMessage;
+    @BindView(R.id.pb_loading_indicator)ProgressBar mLoadingIndicator;
+    @BindView(R.id.tv_error_message_display)TextView mErrorMessage;
     private List<MovieData> mMovieData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        PreferenceManager.setDefaultValues(this,R.xml.pref_general,false);
 
-        mRecyclerView= (RecyclerView) findViewById(R.id.my_recycler_view);
-        mErrorMessage =(TextView) findViewById(R.id.tv_error_message_display);
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+        PreferenceManager.setDefaultValues(this,R.xml.pref_general,false);
 
         GridLayoutManager layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -62,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mMovieAdapter= new MovieAdapter(this);
 
         mRecyclerView.setAdapter(mMovieAdapter);
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
@@ -86,21 +87,22 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     @Override
     public void onClick(MovieData movieData) {
-        String title= movieData.getTitle();
+        /*String title= movieData.getTitle();
         String overview= movieData.getOverview();
         String path=movieData.getPath();
         String rate=movieData.getRate();
-        String release=movieData.getRelease();
+        String release=movieData.getRelease();*/
 
         Context context = this;
         Class destinationClass = DetailActivity.class;
         Intent intent= new Intent(context,destinationClass);
+        intent.putExtra(MovieData.PARCELABLE,movieData);
 
-        intent.putExtra(MovieData.ID_TITLE,title);
+        /*intent.putExtra(MovieData.ID_TITLE,title);
         intent.putExtra(MovieData.ID_OVERVIEW,overview);
         intent.putExtra(MovieData.ID_PATH,path);
         intent.putExtra(MovieData.ID_RATE,rate);
-        intent.putExtra(MovieData.ID_RELEASE,release);
+        intent.putExtra(MovieData.ID_RELEASE,release);*/
 
         startActivity(intent);
 
@@ -140,14 +142,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
                 String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
 
-                final String FORECAST_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
+                final String FORECAST_BASE_URL = "http://api.themoviedb.org/3/movie/";
 
-                final String SORT_PARAM = "sort_by";
+                //final String SORT_PARAM = "sort_by";
 
                 final String APPID_PARAM = "api_key";
 
                 Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
-                        .appendQueryParameter(SORT_PARAM, strings[0])
+                        .appendPath(strings[0])
                         .appendQueryParameter(APPID_PARAM, apiKey)
                         .build();
 
@@ -181,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
 
             } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
+                Log.e(LOG_TAG, e.getMessage(), e);
 
                 return null;
             } finally {
@@ -192,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     try {
                         reader.close();
                     } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
+                        Log.e(LOG_TAG, e.getMessage(), e);
                     }
                 }
             }
