@@ -13,11 +13,6 @@ class MovieData  implements Parcelable{
     private String Release;
 
     public static  final String PARCELABLE="parcelable";
-    /*public static final String ID_TITLE="title";
-    public static final String ID_OVERVIEW="overview";
-    public static final String ID_PATH="path";
-    public static final String ID_RATE="rate";
-    public static final String ID_RELEASE="release";*/
 
     public MovieData(String Title,String Overview, String Rate,String Release, String Path){
 
