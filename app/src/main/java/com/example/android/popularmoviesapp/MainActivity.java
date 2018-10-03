@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
+
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -40,9 +41,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler,
-        LoaderManager.LoaderCallbacks<List<MovieData>>  {
+//LoaderManager.LoaderCallbacks<List<MovieData>>
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler,LoaderManager.LoaderCallbacks<List<MovieData>>
+        ,SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String LOG_TAG=MainActivity.class.getName().toString();
     public static final int APP_LOADER_ID=11;
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mRecyclerView.setAdapter(mMovieAdapter);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref.registerOnSharedPreferenceChangeListener(this);
         String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
         Bundle queryBundle=new Bundle();
 
@@ -85,13 +87,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         LoaderManager loaderManager=getSupportLoaderManager();
         Loader<List<MovieData>> moviesAppSearchLoader= loaderManager.getLoader(APP_LOADER_ID);
 
+        loaderManager.initLoader(APP_LOADER_ID,queryBundle,MainActivity.this);
 
-       if(moviesAppSearchLoader==null){
-            loaderManager.initLoader(APP_LOADER_ID,queryBundle,this);
-        }
-        else {
-            loaderManager.restartLoader(APP_LOADER_ID, queryBundle,this);
-        }
 
     }
 
@@ -104,10 +101,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         Log.v(LOG_TAG,"Preference "+syncConnPref);
         //new GetMovies(this).execute(syncConnPref);
         //
-
-
-
-
     }
 
     @Override
@@ -117,10 +110,24 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         Class destinationClass = DetailActivity.class;
         Intent intent= new Intent(context,destinationClass);
         intent.putExtra(MovieData.PARCELABLE,movieData);
-
-
-
         startActivity(intent);
+    }
+
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+
+        if(key.equals(getString(R.string.pref_order_key))){
+            LoaderManager manager = getSupportLoaderManager();
+            Bundle args = new Bundle();
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
+            args.putString(SEARCH_PREFERENCE_EXTRA,syncConnPref);
+
+            manager.restartLoader(APP_LOADER_ID,args,this);
+        }
+
 
 
 
@@ -128,16 +135,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     @NonNull
     @Override
-    public Loader<List<MovieData>> onCreateLoader(int id, @Nullable final Bundle args) {
-
+    public Loader<List<MovieData>> onCreateLoader(int id, @Nullable final  Bundle args) {
         return new AsyncTaskLoader<List<MovieData>>(this) {
-
             List<MovieData> mData;
 
             @Override
             protected void onStartLoading() {
                 super.onStartLoading();
-                if(args==null){
+                if (args == null) {
                     return;
                 }
                 mLoadingIndicator.setVisibility(View.VISIBLE);
@@ -145,30 +150,24 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 if (mData != null) {
                     deliverResult(mData);
                 } else {
-
                     forceLoad();
                 }
-
             }
 
             @Nullable
             @Override
             public List<MovieData> loadInBackground() {
-
-                String preference=args.getString(SEARCH_PREFERENCE_EXTRA);
-                if(preference==null || TextUtils.isEmpty(preference)){
+                String preference = args.getString(SEARCH_PREFERENCE_EXTRA);
+                if (preference == null || TextUtils.isEmpty(preference)) {
                     return null;
                 }
-
                 return NetworkUtils.getNetworkResponse(preference);
-
-
             }
 
             //Do not forget to override deliverResult function
             @Override
             public void deliverResult(@Nullable List<MovieData> data) {
-                mData=data;
+                mData = data;
                 super.deliverResult(data);
             }
         };
@@ -176,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     @Override
     public void onLoadFinished(@NonNull Loader<List<MovieData>> loader, List<MovieData> movieData) {
-
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         if (movieData != null) {
             showMovieDataView();
@@ -197,173 +195,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     @Override
     public void onLoaderReset(@NonNull Loader<List<MovieData>> loader) {
-
+        mMovieAdapter.restartData();
     }
 
 
-    public class GetMovies extends AsyncTask<String, Void, List<MovieData> > {
-        private final String LOG_TAG = GetMovies.class.getSimpleName();
-        private Context mContext;
-
-        public GetMovies(Context context){
-
-            mContext= context;
-        }
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<MovieData> doInBackground(String... strings) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            String movieJsonStr = null;
-            try {
-
-                SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-                String sort = sharedPrefs.getString(getString(R.string.pref_order_key),
-                        getString(R.string.pref_order_defalult));
-
-
-                String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
-
-                final String FORECAST_BASE_URL = "http://api.themoviedb.org/3/movie/";
-
-                //final String SORT_PARAM = "sort_by";
-
-                final String APPID_PARAM = "api_key";
-
-                Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
-                        .appendPath(strings[0])
-                        .appendQueryParameter(APPID_PARAM, apiKey)
-                        .build();
-
-
-                URL url = new URL(builtUri.toString());
-                Log.v(LOG_TAG, "Link: " + builtUri.toString());
-                // Create the request to OpenWeatherMap, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-
-                    buffer.append(line + "\n");
-                }
-                if (buffer.length() == 0) {
-
-                    return null;
-                }
-                movieJsonStr = buffer.toString();
-
-
-
-            } catch (IOException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, e.getMessage(), e);
-                    }
-                }
-            }
-
-
-            try {
-                return getDescriptionsDataFromJson(movieJsonStr);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        private List<MovieData> getDescriptionsDataFromJson(String forecastJsonStr)
-                throws JSONException {
-
-            // These are the names of the JSON objects that need to be extracted.
-            final String OWM_TITLE = "original_title";
-            final String OWM_OVERVIEW = "overview";
-            final String OWM_VOTE = "vote_average";
-            final String OWM_RELEASE = "release_date";
-            final String OWM_RESULTS = "results";
-            final String OWM_POSTER = "poster_path";
-
-
-            JSONObject movieJson = new JSONObject(forecastJsonStr);
-            JSONArray movieArray = movieJson.getJSONArray(OWM_RESULTS);
-            String originalTitle;
-            String overview;
-            String voteAverage;
-            String releaseDate;
-            String posterPath;
-            List<MovieData> temp = new ArrayList<>();
-
-            for (int i = 0; i < movieArray.length(); i++) {
-
-                JSONObject objeto = movieArray.getJSONObject(i);
-                originalTitle = objeto.getString(OWM_TITLE);
-                overview = objeto.getString(OWM_OVERVIEW);
-                voteAverage = objeto.getString(OWM_VOTE);
-                releaseDate = objeto.getString(OWM_RELEASE);
-                posterPath = objeto.getString(OWM_POSTER);
-
-                MovieData objetoTemporal = new MovieData(originalTitle,
-                        overview,
-                        voteAverage,
-                        releaseDate,
-                        posterPath);
-
-                temp.add(objetoTemporal);
-
-            }
-
-
-            return temp;
-
-        }
-
-        @Override
-        protected void onPostExecute(List<MovieData> movieData) {
-
-
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (movieData != null) {
-                showMovieDataView();
-                String[] array = new String[movieData.size()];
-                for(int i=0; i<array.length;i++){
-
-                    array[i]=movieData.get(i).getPath();
-
-                }
-
-                mMovieAdapter.setMovieData(movieData);
-                mMovieAdapter.notifyDataSetChanged();
-            } else {
-                showErrorMessage();
-            }
-        }
-
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -375,27 +210,28 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         int id = item.getItemId();
 
-
         if (id == R.id.action_settings) {
             Intent startIntentSettings = new Intent(this, SettingsActivity.class);
             startActivity(startIntentSettings);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     private void showMovieDataView() {
-
         mErrorMessage.setVisibility(View.INVISIBLE);
-
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
     private void showErrorMessage() {
-
         mRecyclerView.setVisibility(View.INVISIBLE);
-
         mErrorMessage.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref.unregisterOnSharedPreferenceChangeListener(this);
     }
 }

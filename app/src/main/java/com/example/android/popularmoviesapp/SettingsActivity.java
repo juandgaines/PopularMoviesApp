@@ -8,23 +8,45 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.Window;
 
 
-public class SettingsActivity extends PreferenceActivity
-        implements Preference.OnPreferenceChangeListener{
+public class SettingsActivity extends AppCompatActivity
+{
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
+
+        ActionBar actionBar= this.getSupportActionBar();
+        if(actionBar!=null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
 
-        addPreferencesFromResource(R.xml.pref_general);
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_order_key)));
+        //addPreferencesFromResource(R.xml.pref_general);
+        //bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_order_key)));
 
     }
 
-    private void bindPreferenceSummaryToValue(Preference preference) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id=item.getItemId();
+        if(id==android.R.id.home){
+            NavUtils.navigateUpFromSameTask(this);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+}
+/*
+*
+*     private void bindPreferenceSummaryToValue(Preference preference) {
 
         preference.setOnPreferenceChangeListener(this);
         onPreferenceChange(preference,
@@ -49,6 +71,4 @@ public class SettingsActivity extends PreferenceActivity
             preference.setSummary(stringValue);
         }
         return true;
-    }
-
-}
+    }*/

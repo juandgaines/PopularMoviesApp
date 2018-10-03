@@ -31,6 +31,8 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
         void onClick(MovieData movieData);
     }
 
+
+
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public final ImageView mMoviePosterView;
@@ -99,6 +101,13 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
         mMovieData = movieData;
         notifyDataSetChanged();
     }
+
+    public void restartData(){
+        mMovieData.clear();
+        notifyDataSetChanged();
+    }
+
+
 
 
 
