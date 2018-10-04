@@ -9,11 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.android.popularmoviesapp.data.MovieData;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-import butterknife.BindView;
 
 
 public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {

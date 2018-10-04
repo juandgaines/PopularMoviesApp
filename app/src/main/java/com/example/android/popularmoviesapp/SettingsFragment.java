@@ -49,8 +49,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 listPreference.setSummary(listPreference.getEntries()[prefIndex]);
 
             }
-
-
         }
     }
 

@@ -1,8 +1,9 @@
 package com.example.android.popularmoviesapp;
 
-import android.arch.lifecycle.ViewModelProvider;
 import android.net.Uri;
 import android.util.Log;
+
+import com.example.android.popularmoviesapp.data.MovieData;
 
 import org.json.JSONArray;
 import org.json.JSONException;

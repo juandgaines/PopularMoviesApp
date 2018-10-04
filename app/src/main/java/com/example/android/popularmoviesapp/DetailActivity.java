@@ -1,16 +1,19 @@
 package com.example.android.popularmoviesapp;
 
 import android.content.Intent;
+import android.graphics.Movie;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Property;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.android.popularmoviesapp.data.AppDatabase;
 import com.squareup.picasso.Picasso;
 
-import com.example.android.popularmoviesapp.MovieData;
+import com.example.android.popularmoviesapp.data.MovieData;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -22,32 +25,65 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.rate_view)  TextView mMovieRateDisplay;
     @BindView(R.id.date_view)  TextView mMovieReleaseDisplay;
     @BindView(R.id.movie_picture)  ImageView mMoviePostDisplay;
+    @BindView(R.id.favoriteButton)  ImageView mFavortite;
 
+    AppDatabase mDb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
         Intent intent=getIntent();
 
+        mDb= AppDatabase.getsInstance(getApplicationContext());
+
 
         if(intent!=null && intent.hasExtra(MovieData.PARCELABLE)){
 
-            MovieData movieData = intent.getParcelableExtra(MovieData.PARCELABLE);
+            final MovieData movieData = intent.getParcelableExtra(MovieData.PARCELABLE);
             String mTitleStr =movieData.getTitle();
             String mPathStr=movieData.getPath();
             String mOverviewStr=movieData.getOverview();
             String mRateStr= movieData.getRate();
             String mDateStr=movieData.getRelease();
+            MovieData movie =mDb.favoritesDao().loadFavoriteItemByName(mTitleStr);
+            if(movie!=null){
+                mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
+            }
+            else{
+                mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
+            }
 
-            /*mTitleStr =intent.getStringExtra(MovieData.ID_TITLE);
-            mPathStr=intent.getStringExtra(MovieData.ID_PATH);
-            mDateStr=intent.getStringExtra(MovieData.ID_RELEASE);
-            mRateStr=intent.getStringExtra(MovieData.ID_RATE);
-            mOverviewStr=intent.getStringExtra(MovieData.ID_OVERVIEW);*/
+            mFavortite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
+                    String mTitleStr =movieData.getTitle();
+                    String mPathStr=movieData.getPath();
+                    String mOverviewStr=movieData.getOverview();
+                    String mRateStr= movieData.getRate();
+                    String mDateStr=movieData.getRelease();
 
+                    MovieData movie=new MovieData(mTitleStr,mOverviewStr,mRateStr,mDateStr, mPathStr);
 
+                    MovieData prueba=mDb.favoritesDao().loadFavoriteItemByName(mTitleStr);
+                    //mDb.favoritesDao().deleteAll();
+                    //Log.v(LOG_TAG,prueba.toString());
+
+                    if(prueba!=null && mTitleStr.equals(prueba.getTitle())){
+                        mDb.favoritesDao().deleteFavoriteMovie(prueba);
+                        mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
+                        Toast.makeText(getApplicationContext(),"Removed from favorites",Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        mDb.favoritesDao().insertFavoriteMovie(movie);
+                        mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
+                        Toast.makeText(getApplicationContext(),"Added to favorites",Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
 
             mMovieTitleDisplay.setText(mTitleStr);
             Log.v(LOG_TAG,"value of date "+mDateStr);
