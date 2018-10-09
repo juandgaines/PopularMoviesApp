@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popularmoviesapp.data.AppDatabase;
+import com.example.android.popularmoviesapp.data.AppExecutors;
 import com.squareup.picasso.Picasso;
 
 import com.example.android.popularmoviesapp.data.MovieData;
@@ -42,45 +43,81 @@ public class DetailActivity extends AppCompatActivity {
         if(intent!=null && intent.hasExtra(MovieData.PARCELABLE)){
 
             final MovieData movieData = intent.getParcelableExtra(MovieData.PARCELABLE);
-            String mTitleStr =movieData.getTitle();
-            String mPathStr=movieData.getPath();
+            final String mTitleStr =movieData.getTitle();
+            String mPathStr=movieData.getPosterPath();
             String mOverviewStr=movieData.getOverview();
-            String mRateStr= movieData.getRate();
-            String mDateStr=movieData.getRelease();
-            MovieData movie =mDb.favoritesDao().loadFavoriteItemByName(mTitleStr);
-            if(movie!=null){
-                mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
-            }
-            else{
-                mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
-            }
+            String mRateStr= Double.toString(movieData.getVoteAverage()) ;
+            String mDateStr=movieData.getReleaseDate();
+
+            Log.v(LOG_TAG,"Path"+ mPathStr);
+
+            AppExecutors.getsInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    final MovieData movie =mDb.favoritesDao().loadFavoriteItemByName(mTitleStr);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(movie!=null){
+                                mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
+                            }
+                            else{
+                                mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
+                            }
+                        }
+                    });
+                }
+            });
+
+
+
 
             mFavortite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    String mTitleStr =movieData.getTitle();
-                    String mPathStr=movieData.getPath();
+                    final String mTitleStr =movieData.getTitle();
+                    String mPathStr=movieData.getPosterPath();
                     String mOverviewStr=movieData.getOverview();
-                    String mRateStr= movieData.getRate();
-                    String mDateStr=movieData.getRelease();
+                    String mRateStr= Double.toString(movieData.getVoteAverage());
+                    String mDateStr=movieData.getReleaseDate();
 
-                    MovieData movie=new MovieData(mTitleStr,mOverviewStr,mRateStr,mDateStr, mPathStr);
+                    final MovieData movie=new MovieData(mTitleStr,mOverviewStr,Double.parseDouble(mRateStr) ,mDateStr, mPathStr);
 
-                    MovieData prueba=mDb.favoritesDao().loadFavoriteItemByName(mTitleStr);
+                    AppExecutors.getsInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            final MovieData prueba=mDb.favoritesDao().loadFavoriteItemByName(mTitleStr);
+
+                            if(prueba!=null && mTitleStr.equals(prueba.getTitle())){
+                                mDb.favoritesDao().deleteFavoriteMovie(prueba);
+                            }
+                            else {
+                                mDb.favoritesDao().insertFavoriteMovie(movie);
+                            }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(prueba!=null && mTitleStr.equals(prueba.getTitle())){
+                                        mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
+                                        Toast.makeText(getApplicationContext(),"Removed from favorites",Toast.LENGTH_SHORT).show();
+                                    }
+                                    else {
+                                        mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
+                                        Toast.makeText(getApplicationContext(),"Added to favorites",Toast.LENGTH_SHORT).show();
+                                    }
+
+                                }
+                            });
+                        }
+                    });
+
                     //mDb.favoritesDao().deleteAll();
                     //Log.v(LOG_TAG,prueba.toString());
 
-                    if(prueba!=null && mTitleStr.equals(prueba.getTitle())){
-                        mDb.favoritesDao().deleteFavoriteMovie(prueba);
-                        mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
-                        Toast.makeText(getApplicationContext(),"Removed from favorites",Toast.LENGTH_SHORT).show();
-                    }
-                    else {
-                        mDb.favoritesDao().insertFavoriteMovie(movie);
-                        mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
-                        Toast.makeText(getApplicationContext(),"Added to favorites",Toast.LENGTH_SHORT).show();
-                    }
+
 
                 }
             });

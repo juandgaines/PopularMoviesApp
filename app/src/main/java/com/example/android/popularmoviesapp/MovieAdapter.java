@@ -1,5 +1,6 @@
 package com.example.android.popularmoviesapp;
 
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.android.popularmoviesapp.data.MovieData;
+import com.example.android.popularmoviesapp.data.Result;
+import com.example.android.popularmoviesapp.data.Results;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -19,15 +22,16 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
 
     public final static String LOG_TAG= MovieAdapter.class.getName().toString();
     private Context context;
-    private List<MovieData> mMovieData;
+    private List<Result> mMovieData;
     private final MovieAdapterOnClickHandler mClickHandler;
 
-    public MovieAdapter(MovieAdapterOnClickHandler clickHandler) {
-        mClickHandler = clickHandler;
+    public MovieAdapter(MovieAdapterOnClickHandler clickHandler, List<Result> movieFetchedData) {
+        mClickHandler =  clickHandler;
+        setMovieData(movieFetchedData);
     }
 
     public interface MovieAdapterOnClickHandler {
-        void onClick(MovieData movieData);
+        void onClick(Result movieData);
     }
 
 
@@ -47,7 +51,7 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
         @Override
         public void onClick(View view) {
             int adapterPosition=getAdapterPosition();
-            MovieData movieData = mMovieData.get(adapterPosition);
+            Result movieData = mMovieData.get(adapterPosition);
             mClickHandler.onClick(movieData);
 
 
@@ -70,7 +74,7 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder movieViewHolder, int position ) {
-        String movieImage = mMovieData.get(position).getPath();
+        String movieImage = mMovieData.get(position).getPosterPath();
 
         Log.v(LOG_TAG,"movie image"+movieImage);
 
@@ -96,7 +100,7 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
         if (null == mMovieData) return 0;
         return mMovieData.size();
     }
-    public void setMovieData(List<MovieData> movieData) {
+    public void setMovieData(List<Result> movieData) {
         mMovieData = movieData;
         notifyDataSetChanged();
     }

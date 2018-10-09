@@ -1,5 +1,10 @@
 package com.example.android.popularmoviesapp;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,19 +26,34 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.popularmoviesapp.data.MovieData;
+import com.example.android.popularmoviesapp.data.Result;
+import com.example.android.popularmoviesapp.data.Results;
+import com.example.android.popularmoviesapp.network.MovieService;
+import com.example.android.popularmoviesapp.network.RetroClass;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 //LoaderManager.LoaderCallbacks<List<MovieData>>
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler,LoaderManager.LoaderCallbacks<List<MovieData>>
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler
         ,SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String LOG_TAG=MainActivity.class.getName().toString();
-    public static final int APP_LOADER_ID=11;
+    private FetchViewModel fetchViewModel;
+    private FetchViewModel fetchViewModel2;
     private static final String SEARCH_PREFERENCE_EXTRA ="preference-query";
 
 
@@ -41,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private MovieAdapter mMovieAdapter;
     @BindView(R.id.pb_loading_indicator)ProgressBar mLoadingIndicator;
     @BindView(R.id.tv_error_message_display)TextView mErrorMessage;
-    private List<MovieData> mMovieData;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,142 +69,90 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        fetchViewModel= ViewModelProviders.of(this).get(FetchViewModel.class);
+        fetchViewModel2= ViewModelProviders.of(this).get(FetchViewModel.class);
+
         PreferenceManager.setDefaultValues(this,R.xml.pref_general,false);
-
-        GridLayoutManager layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
-        mRecyclerView.setLayoutManager(layoutManager);
-
-
-        mRecyclerView.setHasFixedSize(true);
-
-
-        mMovieAdapter= new MovieAdapter(this);
-
-        mRecyclerView.setAdapter(mMovieAdapter);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
         String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
-        Bundle queryBundle=new Bundle();
+        String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
 
-        queryBundle.putString(SEARCH_PREFERENCE_EXTRA,syncConnPref);
-        //new GetMovies(this).execute(syncConnPref);
+        fetchViewModel.getResultsLiveData(syncConnPref,apiKey).observe(this, new Observer<List<Result>>() {
+            @Override
+            public void onChanged(@Nullable List<Result> results) {
+
+                mMovieAdapter = new MovieAdapter(MainActivity.this,results);
+                mRecyclerView.setAdapter(mMovieAdapter);
 
 
-        LoaderManager loaderManager=getSupportLoaderManager();
-        Loader<List<MovieData>> moviesAppSearchLoader= loaderManager.getLoader(APP_LOADER_ID);
+            }
+        });
 
-        loaderManager.initLoader(APP_LOADER_ID,queryBundle,MainActivity.this);
+        fetchViewModel.getmNetworkProblem().observe(this, new Observer<BooleanJ>() {
+            @Override
+            public void onChanged(@Nullable BooleanJ booleanJ) {
+                boolean status=booleanJ.getStatus();
+                if(status){
+                    showErrorMessage();
+                }
+                else{
+                    showMovieDataView();
+                }
+            }
+        });
 
+
+
+
+
+
+
+
+
+        GridLayoutManager layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mRecyclerView.setHasFixedSize(true);
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
-        Log.v(LOG_TAG,"Preference "+syncConnPref);
-        //new GetMovies(this).execute(syncConnPref);
-        //
-    }
 
     @Override
-    public void onClick(MovieData movieData) {
+    public void onClick(Result movieData) {
 
         Context context = this;
         Class destinationClass = DetailActivity.class;
         Intent intent= new Intent(context,destinationClass);
-        intent.putExtra(MovieData.PARCELABLE,movieData);
+
+        String title = movieData.getTitle();
+        String overview = movieData.getOverview();
+        String release = movieData.getReleaseDate();
+        double rate = movieData.getVoteAverage();
+        String path = movieData.getPosterPath();
+
+        MovieData movie = new MovieData(title,overview,rate,release, path);
+        intent.putExtra(MovieData.PARCELABLE,movie);
         startActivity(intent);
     }
-
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-
         if(key.equals(getString(R.string.pref_order_key))){
-            LoaderManager manager = getSupportLoaderManager();
+            final LoaderManager manager = getSupportLoaderManager();
             Bundle args = new Bundle();
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
-            args.putString(SEARCH_PREFERENCE_EXTRA,syncConnPref);
+            String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
+            Log.v(LOG_TAG, "Se supone que debe actualizar...");
+            fetchViewModel.loadLiveData(syncConnPref,apiKey);
 
-            manager.restartLoader(APP_LOADER_ID,args,this);
-        }
-
-
-
-
-    }
-
-    @NonNull
-    @Override
-    public Loader<List<MovieData>> onCreateLoader(int id, @Nullable final  Bundle args) {
-        return new AsyncTaskLoader<List<MovieData>>(this) {
-            List<MovieData> mData;
-
-            @Override
-            protected void onStartLoading() {
-                super.onStartLoading();
-                if (args == null) {
-                    return;
-                }
-                mLoadingIndicator.setVisibility(View.VISIBLE);
-                //Do not forget to add this if statement
-                if (mData != null) {
-                    deliverResult(mData);
-                } else {
-                    forceLoad();
-                }
-            }
-
-            @Nullable
-            @Override
-            public List<MovieData> loadInBackground() {
-                String preference = args.getString(SEARCH_PREFERENCE_EXTRA);
-                if (preference == null || TextUtils.isEmpty(preference)) {
-                    return null;
-                }
-                return NetworkUtils.getNetworkResponse(preference);
-            }
-
-            //Do not forget to override deliverResult function
-            @Override
-            public void deliverResult(@Nullable List<MovieData> data) {
-                mData = data;
-                super.deliverResult(data);
-            }
-        };
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull Loader<List<MovieData>> loader, List<MovieData> movieData) {
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-        if (movieData != null) {
-            showMovieDataView();
-            String[] array = new String[movieData.size()];
-            for(int i=0; i<array.length;i++){
-
-                array[i]=movieData.get(i).getPath();
-
-            }
-
-            mMovieAdapter.setMovieData(movieData);
-            mMovieAdapter.notifyDataSetChanged();
-        } else {
-            showErrorMessage();
         }
 
     }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<List<MovieData>> loader) {
-        mMovieAdapter.restartData();
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -192,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 

@@ -126,7 +126,7 @@ public class NetworkUtils {
 
             MovieData objetoTemporal = new MovieData(originalTitle,
                     overview,
-                    voteAverage,
+                    Double.parseDouble(voteAverage) ,
                     releaseDate,
                     posterPath);
 
