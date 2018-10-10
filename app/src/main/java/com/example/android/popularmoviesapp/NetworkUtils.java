@@ -112,6 +112,7 @@ public class NetworkUtils {
         String overview;
         String voteAverage;
         String releaseDate;
+        int id_movie;
         String posterPath;
         List<MovieData> temp = new ArrayList<>();
 
@@ -123,12 +124,14 @@ public class NetworkUtils {
             voteAverage = objeto.getString(OWM_VOTE);
             releaseDate = objeto.getString(OWM_RELEASE);
             posterPath = objeto.getString(OWM_POSTER);
+            id_movie=objeto.getInt("id");
+
 
             MovieData objetoTemporal = new MovieData(originalTitle,
                     overview,
                     Double.parseDouble(voteAverage) ,
                     releaseDate,
-                    posterPath);
+                    posterPath,id_movie);
 
             temp.add(objetoTemporal);
 

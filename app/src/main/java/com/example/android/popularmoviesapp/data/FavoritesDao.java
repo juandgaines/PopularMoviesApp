@@ -1,6 +1,7 @@
 package com.example.android.popularmoviesapp.data;
 
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -15,10 +16,10 @@ import java.util.List;
 public interface FavoritesDao {
 
     @Query("SELECT * FROM favorites ORDER BY id")
-    List<MovieData> loadAllFavoritesMovies();
+    LiveData<List<MovieData>> loadAllFavoritesMovies();
 
-    @Query("SELECT * FROM favorites WHERE title=:name")
-    MovieData loadFavoriteItemByName(String name);
+    @Query("SELECT * FROM favorites WHERE movie_id=:id")
+    LiveData<MovieData> loadFavoriteItemByName(int id);
 
     @Insert
     void insertFavoriteMovie(MovieData movieData);

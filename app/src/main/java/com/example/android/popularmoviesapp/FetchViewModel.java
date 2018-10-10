@@ -1,20 +1,14 @@
 package com.example.android.popularmoviesapp;
 
-import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.android.popularmoviesapp.data.Result;
 import com.example.android.popularmoviesapp.data.Results;
 import com.example.android.popularmoviesapp.network.MovieService;
-import com.example.android.popularmoviesapp.network.RetroClass;
+import com.example.android.popularmoviesapp.network.RetroClassMainListView;
 
 import java.util.List;
 
@@ -23,9 +17,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class FetchViewModel extends ViewModel{
-
+    private static final String API_KEY = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
     private List<Result> results;
-    private RetroClass retroClass=new RetroClass();
+    private RetroClassMainListView retroClass=new RetroClassMainListView();
     private MutableLiveData<List<Result>> resultsLiveData;
     private MutableLiveData<BooleanJ> mNetworkProblem;
 
@@ -43,7 +37,7 @@ public class FetchViewModel extends ViewModel{
             mNetworkProblem=new MutableLiveData<>();
 
             resultsLiveData=new MutableLiveData<>();
-            loadLiveData(pref,apiKey);
+            loadLiveData(pref);
             //resultsLiveData=retroClass.getResultLiveData(pref,apiKey);
         }
 
@@ -56,13 +50,13 @@ public class FetchViewModel extends ViewModel{
         }
     }
 
-    public void loadLiveData(String pref,String apiKey){
+    public void loadLiveData(String pref){
 
-        MovieService movieService=RetroClass.getMovieService();
+        MovieService movieService= RetroClassMainListView.getMovieService();
         initNetLiveData();
 
 
-        movieService.getMovies(pref,apiKey).enqueue(new Callback<Results>() {
+        movieService.getMovies(pref,API_KEY).enqueue(new Callback<Results>() {
             @Override
             public void onResponse(Call<Results> call, Response<Results> response) {
 

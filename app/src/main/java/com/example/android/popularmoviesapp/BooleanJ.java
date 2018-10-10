@@ -8,7 +8,6 @@ class BooleanJ {
 
         status=false;
 
-
     }
 
     public void setStatus(boolean status) {

@@ -1,51 +1,33 @@
 package com.example.android.popularmoviesapp;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.popularmoviesapp.data.MovieData;
 import com.example.android.popularmoviesapp.data.Result;
-import com.example.android.popularmoviesapp.data.Results;
-import com.example.android.popularmoviesapp.network.MovieService;
-import com.example.android.popularmoviesapp.network.RetroClass;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.example.android.popularmoviesapp.BooleanJ;
 
-import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 //LoaderManager.LoaderCallbacks<List<MovieData>>
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler
@@ -105,13 +87,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         });
 
 
-
-
-
-
-
-
-
         GridLayoutManager layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
         mRecyclerView.setLayoutManager(layoutManager);
 
@@ -132,8 +107,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         String release = movieData.getReleaseDate();
         double rate = movieData.getVoteAverage();
         String path = movieData.getPosterPath();
+        int id_movie=movieData.getId();
 
-        MovieData movie = new MovieData(title,overview,rate,release, path);
+        MovieData movie = new MovieData(title,overview,rate,release, path,id_movie);
         intent.putExtra(MovieData.PARCELABLE,movie);
         startActivity(intent);
     }
@@ -148,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
             String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
             Log.v(LOG_TAG, "Se supone que debe actualizar...");
-            fetchViewModel.loadLiveData(syncConnPref,apiKey);
+            fetchViewModel.loadLiveData(syncConnPref);
 
         }
 
