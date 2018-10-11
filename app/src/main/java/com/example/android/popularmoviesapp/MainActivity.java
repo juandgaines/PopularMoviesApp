@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -14,11 +15,13 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.popularmoviesapp.data.MovieData;
 import com.example.android.popularmoviesapp.data.Result;
@@ -35,8 +38,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     public static final String LOG_TAG=MainActivity.class.getName().toString();
     private FetchViewModel fetchViewModel;
-    private FetchViewModel fetchViewModel2;
+    public static final String FAVORITE_MODE="favorites";
     private static final String SEARCH_PREFERENCE_EXTRA ="preference-query";
+
+    private boolean favoritesMode=false;
 
 
     @BindView(R.id.my_recycler_view)  RecyclerView mRecyclerView;
@@ -52,8 +57,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+
+        FetchMode();
+    }
+
+
+    void FetchMode(){
+        mErrorMessage.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+
         fetchViewModel= ViewModelProviders.of(this).get(FetchViewModel.class);
-        fetchViewModel2= ViewModelProviders.of(this).get(FetchViewModel.class);
 
         PreferenceManager.setDefaultValues(this,R.xml.pref_general,false);
 
@@ -62,13 +76,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
         String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
 
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        final int width = size.x;
+        int height = size.y;
+
+        Log.v("Width",Integer.toString(width));
+
         fetchViewModel.getResultsLiveData(syncConnPref,apiKey).observe(this, new Observer<List<Result>>() {
             @Override
             public void onChanged(@Nullable List<Result> results) {
 
-                mMovieAdapter = new MovieAdapter(MainActivity.this,results);
+                mMovieAdapter = new MovieAdapter(MainActivity.this,results, width);
                 mRecyclerView.setAdapter(mMovieAdapter);
-
 
             }
         });
@@ -81,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     showErrorMessage();
                 }
                 else{
+
                     showMovieDataView();
                 }
             }
@@ -88,9 +110,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
 
         GridLayoutManager layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
+
         mRecyclerView.setLayoutManager(layoutManager);
 
         mRecyclerView.setHasFixedSize(true);
+
 
     }
 
@@ -147,15 +171,24 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             startActivity(startIntentSettings);
             return true;
         }
+
+        else if (id == R.id.action_favorites) {
+            Toast.makeText(this,"Nueva actividad",Toast.LENGTH_SHORT).show();
+            Intent startIntentFavorites = new Intent(this, FavoritesActivity.class);
+            startActivity(startIntentFavorites);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
     private void showMovieDataView() {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
         mErrorMessage.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
     private void showErrorMessage() {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessage.setVisibility(View.VISIBLE);
     }

@@ -2,6 +2,7 @@
     <string name="app_name">PopularMoviesApp</string>
     <string name="error_message">Unable to load data. Please try later.</string>
     <string name="action_settings">Settings</string>
+    <string name="action_favorites">Favorites</string>
     <string name="title_activity_details">Details</string>
     <string name="title_activity_settings">Settings</string>
 
