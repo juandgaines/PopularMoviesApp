@@ -1,9 +1,4 @@
-
 package com.example.android.popularmoviesapp.data;
-
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;

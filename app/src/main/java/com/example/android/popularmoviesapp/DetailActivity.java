@@ -2,14 +2,22 @@ package com.example.android.popularmoviesapp;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Movie;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +33,7 @@ import com.squareup.picasso.Picasso;
 
 import com.example.android.popularmoviesapp.data.MovieData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -33,7 +42,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements TrailersAdapter.TrailerAdapterOnClickHandler{
     private static final String LOG_TAG= DetailActivity.class.getName().toString();
     @BindView(R.id.name_movie) TextView mMovieTitleDisplay;
     @BindView(R.id.Overview_view)  TextView mMovieOverviewDisplay;
@@ -41,6 +50,12 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.date_view)  TextView mMovieReleaseDisplay;
     @BindView(R.id.movie_picture)  ImageView mMoviePostDisplay;
     @BindView(R.id.favoriteButton)  ImageView mFavortite;
+    @BindView(R.id.trailer_listview) RecyclerView mTrailerListView;
+    @BindView(R.id.reviews_listview) RecyclerView mReviewsListView;
+
+    private ReviewsAdapter reviewsAdapter;
+    private TrailersAdapter trailersAdapter;
+
 
     AppDatabase mDb;
     @Override
@@ -64,76 +79,68 @@ public class DetailActivity extends AppCompatActivity {
             final String mDateStr=movieData.getReleaseDate();
 
             Log.v(LOG_TAG,"MovieData"+ movieData.toString());
-            final LiveData<MovieData> movie =mDb.favoritesDao().loadFavoriteItemByName(id_movie);
 
-            movie.observe(this, new Observer<MovieData>() {
+            DetailViewModelFactory factory =new DetailViewModelFactory(mDb,id_movie);
+
+            final DetailActivityViewModel viewModel=
+                    ViewModelProviders.of(this,factory).get(DetailActivityViewModel.class);
+
+
+            viewModel.getmCurrentMovie().observe(this, new Observer<MovieData>() {
                 @Override
                 public void onChanged(@Nullable MovieData movieData) {
-                    if(movie.getValue()!=null){
+                    if(viewModel.getmCurrentMovie().getValue()!=null){
                         mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
                     }
                     else{
                         mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
                     }
+
+                    populateUI(id_movie,mTitleStr,mPathStr,mOverviewStr,mRateStr,mDateStr);
                 }
             });
 
 
 
-            MovieService movieService= RetroClassMainListView.getMovieService();
-
-            movieService.getTrailer(id_movie,BuildConfig.OPEN_THE_MOVIE_DB_API_KEY).enqueue(new Callback<ResultTrailers>() {
+            viewModel.getTrailersLiveData(id_movie).observe(this, new Observer<List<Trailer>>() {
                 @Override
-                public void onResponse(Call<ResultTrailers> call, Response<ResultTrailers> response) {
+                public void onChanged(@Nullable List<Trailer> trailers) {
 
-                    ResultTrailers cache= response.body();
-                    List<Trailer> movieTrailers=cache.getResults();
-
-                    for(Trailer trailer:movieTrailers){
-
-                        Log.v( "TRAILER", "https://www.youtube.com/watch?v="+trailer.getKey());
-                    }
-
-
-                }
-
-                @Override
-                public void onFailure(Call<ResultTrailers> call, Throwable t) {
+                    trailersAdapter= new TrailersAdapter(DetailActivity.this,trailers);
+                    mTrailerListView.setAdapter(trailersAdapter);
 
                 }
             });
 
-            movieService.getReviews(id_movie,BuildConfig.OPEN_THE_MOVIE_DB_API_KEY).enqueue(new Callback<ResultReviews>() {
+            viewModel.getReviewLiveData(id_movie).observe(this, new Observer<List<Review>>() {
                 @Override
-                public void onResponse(Call<ResultReviews> call, Response<ResultReviews> response) {
-                    ResultReviews cache= response.body();
-                    List<Review> movieReviews=cache.getResults();
+                public void onChanged(@Nullable List<Review> reviews) {
 
-                    for(Review review:movieReviews){
-
-                        Log.v( "REVIEWS", review.getAuthor()+ ": "+ review.getContent());
-                    }
-
-                }
-
-                @Override
-                public void onFailure(Call<ResultReviews> call, Throwable t) {
+                    reviewsAdapter= new ReviewsAdapter(reviews);
+                    mReviewsListView.setAdapter(reviewsAdapter);
 
                 }
             });
+
+
+            LinearLayoutManager layoutManager= new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+            LinearLayoutManager layoutManager2= new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
+            mReviewsListView.setLayoutManager(layoutManager);
+            mTrailerListView.setLayoutManager(layoutManager2);
+            mTrailerListView.setHasFixedSize(true);
+            mReviewsListView.setHasFixedSize(true);
 
             mFavortite.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
+                public void onClick(final View view) {
 
                     final MovieData movieCache=new MovieData(mTitleStr,mOverviewStr,Double.parseDouble(mRateStr) ,mDateStr, mPathStr,id_movie);
 
                     AppExecutors.getsInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
-
-                            if(movie.getValue()!=null){
-                                mDb.favoritesDao().deleteFavoriteMovie(movie.getValue());
+                            if(viewModel.getmCurrentMovie().getValue()!=null){
+                                mDb.favoritesDao().deleteFavoriteMovie(viewModel.getmCurrentMovie().getValue());
                                 Log.v(LOG_TAG,"MovieData removed");
                             }
                             else {
@@ -146,52 +153,70 @@ public class DetailActivity extends AppCompatActivity {
                 }
             });
 
-            mMovieTitleDisplay.setText(mTitleStr);
-            Log.v(LOG_TAG,"value of date "+mDateStr);
-            if(mDateStr==null|| mDateStr.equals("")) {
-                //mDateStr= getResources().getString(R.string.error_date_message);
-                mMovieReleaseDisplay.setText(getResources().getString(R.string.error_date_message));
-            }
-            else{
-                mMovieReleaseDisplay.setText(mDateStr);
-            }
-
-
-            Log.v(LOG_TAG,"value of rate "+mRateStr);
-            if(mRateStr!=null || mRateStr.equals("")){
-                mMovieRateDisplay.setText(mRateStr+"/10");
-            }
-            else{
-                //mRateStr= getResources().getString(R.string.error_rate_message);
-                mMovieRateDisplay.setText(getResources().getString(R.string.error_rate_message));
-            }
-            Log.v(LOG_TAG,"value of overview "+mOverviewStr);
-            if(mOverviewStr==null|| mOverviewStr.equals("")){
-                mMovieOverviewDisplay.setText(getResources().getString(R.string.error_overview_message));
-            }
-            else{
-                mMovieOverviewDisplay.setText(mOverviewStr);
-            }
-
-
-            Log.v(LOG_TAG,"value of post: "+mPathStr);
-
-
-            if(!mPathStr.equals("null")){
-                Picasso.with(this)
-                        .load(MovieData.BASE_LINK +mPathStr)
-                        .resize(600,1000)
-                        .centerInside()
-                        .into(mMoviePostDisplay);
-            }
-            else{
-                Picasso.with(this)
-                        .load(R.drawable.not_found)
-                        .resize(600,800)
-                        .into(mMoviePostDisplay);
-            }
-
         }
 
+    }
+
+
+    @Override
+    public void onClick(Trailer trailerData) {
+        Uri url =Uri.parse("https://www.youtube.com/watch?v="+ trailerData.getKey());
+
+        Intent intent =new Intent(Intent.ACTION_VIEW,url);
+
+        intent.putExtra(Intent.EXTRA_TEXT, url.toString());
+
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+
+
+    }
+
+    private void  populateUI(int id_movie,String mTitleStr,String mPathStr,String mOverviewStr,String mRateStr, String mDateStr){
+        mMovieTitleDisplay.setText(mTitleStr);
+        Log.v(LOG_TAG,"value of date "+mDateStr);
+        if(mDateStr==null|| mDateStr.equals("")) {
+            //mDateStr= getResources().getString(R.string.error_date_message);
+            mMovieReleaseDisplay.setText(getResources().getString(R.string.error_date_message));
+        }
+        else{
+            mMovieReleaseDisplay.setText(mDateStr);
+        }
+
+
+        Log.v(LOG_TAG,"value of rate "+mRateStr);
+        if(mRateStr!=null || mRateStr.equals("")){
+            mMovieRateDisplay.setText(mRateStr+"/10");
+        }
+        else{
+            mMovieRateDisplay.setText(getResources().getString(R.string.error_rate_message));
+        }
+        Log.v(LOG_TAG,"value of overview "+mOverviewStr);
+        if(mOverviewStr==null|| mOverviewStr.equals("")){
+            mMovieOverviewDisplay.setText(getResources().getString(R.string.error_overview_message));
+        }
+        else{
+            mMovieOverviewDisplay.setText(mOverviewStr);
+        }
+
+
+        Log.v(LOG_TAG,"value of post: "+mPathStr);
+
+
+        if(!mPathStr.equals("null")){
+            Picasso.with(this)
+                    .load(MovieData.BASE_LINK +mPathStr)
+                    .resize(600,1000)
+                    .centerInside()
+                    .into(mMoviePostDisplay);
+        }
+        else{
+            Picasso.with(this)
+                    .load(R.drawable.not_found)
+                    .resize(600,800)
+                    .into(mMoviePostDisplay);
+        }
     }
 }

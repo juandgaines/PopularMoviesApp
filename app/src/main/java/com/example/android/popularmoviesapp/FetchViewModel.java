@@ -18,8 +18,6 @@ import retrofit2.Response;
 
 public class FetchViewModel extends ViewModel{
     private static final String API_KEY = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
-    private List<Result> results;
-    private RetroClassMainListView retroClass=new RetroClassMainListView();
     private MutableLiveData<List<Result>> resultsLiveData;
     private MutableLiveData<BooleanJ> mNetworkProblem;
 
@@ -34,11 +32,9 @@ public class FetchViewModel extends ViewModel{
 
     public LiveData<List<Result>> getResultsLiveData(String pref, String apiKey){
         if (resultsLiveData==null ){
-            mNetworkProblem=new MutableLiveData<>();
 
             resultsLiveData=new MutableLiveData<>();
             loadLiveData(pref);
-            //resultsLiveData=retroClass.getResultLiveData(pref,apiKey);
         }
 
         return resultsLiveData;
@@ -73,7 +69,6 @@ public class FetchViewModel extends ViewModel{
             @Override
             public void onFailure(Call<Results> call, Throwable t) {
                 Log.v("Retrofit","No internet connection");
-
                 BooleanJ booleanJ= new BooleanJ();
                 booleanJ.setStatus(true);
                 mNetworkProblem.setValue(booleanJ);

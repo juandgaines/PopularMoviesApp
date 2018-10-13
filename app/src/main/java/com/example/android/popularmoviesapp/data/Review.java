@@ -18,6 +18,7 @@ public class Review {
     @Expose
     private String url;
 
+
     public String getAuthor() {
         return author;
     }

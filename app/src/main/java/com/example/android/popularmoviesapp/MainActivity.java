@@ -8,8 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -21,31 +19,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.example.android.popularmoviesapp.data.MovieData;
 import com.example.android.popularmoviesapp.data.Result;
-import com.example.android.popularmoviesapp.BooleanJ;
-
 import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-//LoaderManager.LoaderCallbacks<List<MovieData>>
+
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler
         ,SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String LOG_TAG=MainActivity.class.getName().toString();
     private FetchViewModel fetchViewModel;
-    public static final String FAVORITE_MODE="favorites";
-    private static final String SEARCH_PREFERENCE_EXTRA ="preference-query";
-
-    private boolean favoritesMode=false;
 
 
     @BindView(R.id.my_recycler_view)  RecyclerView mRecyclerView;
     private MovieAdapter mMovieAdapter;
+    private FavoriteMovieAdapter mMovieAdapter2;
     @BindView(R.id.pb_loading_indicator)ProgressBar mLoadingIndicator;
     @BindView(R.id.tv_error_message_display)TextView mErrorMessage;
 
@@ -80,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         Point size = new Point();
         display.getSize(size);
         final int width = size.x;
-        int height = size.y;
+        final int height = size.y;
 
         Log.v("Width",Integer.toString(width));
 
@@ -88,7 +78,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             @Override
             public void onChanged(@Nullable List<Result> results) {
 
-                mMovieAdapter = new MovieAdapter(MainActivity.this,results, width);
+                mMovieAdapter = new MovieAdapter(MainActivity.this,results, width,height);
+
                 mRecyclerView.setAdapter(mMovieAdapter);
 
             }
@@ -129,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         String title = movieData.getTitle();
         String overview = movieData.getOverview();
         String release = movieData.getReleaseDate();
+        Log.v("Release:", release);
         double rate = movieData.getVoteAverage();
         String path = movieData.getPosterPath();
         int id_movie=movieData.getId();
@@ -142,12 +134,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
         if(key.equals(getString(R.string.pref_order_key))){
-            final LoaderManager manager = getSupportLoaderManager();
-            Bundle args = new Bundle();
+
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
-            String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
-            Log.v(LOG_TAG, "Se supone que debe actualizar...");
             fetchViewModel.loadLiveData(syncConnPref);
 
         }
@@ -173,7 +162,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         }
 
         else if (id == R.id.action_favorites) {
-            Toast.makeText(this,"Nueva actividad",Toast.LENGTH_SHORT).show();
             Intent startIntentFavorites = new Intent(this, FavoritesActivity.class);
             startActivity(startIntentFavorites);
             return true;
@@ -199,4 +187,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
     }
+
+
 }

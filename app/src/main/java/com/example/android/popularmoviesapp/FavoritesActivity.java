@@ -2,6 +2,7 @@ package com.example.android.popularmoviesapp;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.content.Intent;
 import android.graphics.Point;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -51,24 +52,20 @@ public class FavoritesActivity extends AppCompatActivity implements  FavoriteMov
             }
         });
 
-        LinearLayoutManager layoutManager2 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-
-        /* setLayoutManager associates the LayoutManager we created above with our RecyclerView */
+        GridLayoutManager layoutManager2 = new GridLayoutManager(this, 2,LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager2);
-
-        /*
-         * Use this setting to improve performance if you know that changes in content do not
-         * change the child layout size in the RecyclerView
-         */
         mRecyclerView.setHasFixedSize(true);
-
-
 
 
     }
 
     @Override
     public void onClick(MovieData movieData) {
+
+        Intent intent =new Intent(this, DetailActivity.class);
+
+        intent.putExtra(MovieData.PARCELABLE,movieData);
+        startActivity(intent);
 
     }
 }

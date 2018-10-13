@@ -128,7 +128,10 @@
 
 
 
+
+
             </LinearLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -149,7 +152,42 @@
                 android:textColor="@android:color/white"
                 android:id="@+id/Overview_view" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="24sp"
+                android:text="@string/triler_title"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:id="@+id/trailer_title" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/trailer_listview"
+                android:layout_width="match_parent"
+                android:layout_height="150dp">
+
+            </android.support.v7.widget.RecyclerView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="24sp"
+                android:text="@string/reviews_title"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:id="@+id/reviews_title" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/reviews_listview"
+                android:layout_width="match_parent"
+                android:layout_height="250dp">
+
+            </android.support.v7.widget.RecyclerView>
+
         </LinearLayout>
+
+
 
     </ScrollView>
 

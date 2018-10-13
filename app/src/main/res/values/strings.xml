@@ -20,6 +20,9 @@
     <string name="pref_order_defalult" translatable="false">popular</string>
 
     <string name="button_mark_as_favorite"> Mark as favorite</string>
+    <string name="triler_title">Trailers</string>
+    <string name="reviews_title">Reviews</string>
+    <string name="title_activity_favorites">Favorites</string>
 
     <string-array name="pref_order_movies">
         <item>Most populars</item>

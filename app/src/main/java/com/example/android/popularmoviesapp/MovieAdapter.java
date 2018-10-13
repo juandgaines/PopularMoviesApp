@@ -1,21 +1,15 @@
 package com.example.android.popularmoviesapp;
 
-import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
-
-import com.example.android.popularmoviesapp.data.MovieData;
+import android.widget.TextView;
 import com.example.android.popularmoviesapp.data.Result;
-import com.example.android.popularmoviesapp.data.Results;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -28,11 +22,13 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
     private List<Result> mMovieData;
     private final MovieAdapterOnClickHandler mClickHandler;
     private int mWidth;
+    private int mHeight;
 
-    public MovieAdapter(MovieAdapterOnClickHandler clickHandler, List<Result> movieFetchedData,int width) {
+    public MovieAdapter(MovieAdapterOnClickHandler clickHandler, List<Result> movieFetchedData,int width,int height) {
         mClickHandler =  clickHandler;
         setMovieData(movieFetchedData);
         mWidth=width;
+        mHeight=height;
     }
 
     public interface MovieAdapterOnClickHandler {
@@ -44,7 +40,7 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
     @Override
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         context = viewGroup.getContext();
-        int layoutIdForListItem = R.layout.movie_list_item;
+        int layoutIdForListItem = R.layout.favorite_movie_list_item;
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean shouldAttachToParentImmediately = false;
 
@@ -55,13 +51,14 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder movieViewHolder, int position ) {
         String movieImage = mMovieData.get(position).getPosterPath();
+        String mTitle =mMovieData.get(position).getTitle();
 
         Log.v(LOG_TAG,"movie image"+movieImage);
 
 
         if (!movieImage.equals("null")){
             Picasso.with(context).load ("http://image.tmdb.org/t/p/w185/"+movieImage)
-                    .resize(mWidth/2,1000)
+                    .resize((int) Math.round(mWidth/2.3),(int) Math.round(mHeight/2.3) )
                     .centerInside()
                     .into(movieViewHolder.mMoviePosterView);
         }else{
@@ -70,7 +67,7 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
                     .resize(600,1000)
                     .into(movieViewHolder.mMoviePosterView);
         }
-
+        movieViewHolder.mTitleMovie.setText(mTitle);
 
 
     }
@@ -95,12 +92,14 @@ public class MovieAdapter  extends RecyclerView.Adapter<MovieAdapter.MovieViewHo
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public final ImageView mMoviePosterView;
+        public final TextView mTitleMovie;
 
 
         public MovieViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            mMoviePosterView= (ImageView) itemView.findViewById(R.id.tv_movie_image);
+            mMoviePosterView= (ImageView) itemView.findViewById(R.id.favorite_movie_poster);
+            mTitleMovie=(TextView) itemView.findViewById(R.id.favorite_movie_title) ;
             itemView.setOnClickListener(this);
         }
 
