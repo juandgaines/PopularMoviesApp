@@ -24,6 +24,7 @@
     <string name="reviews_title">Reviews</string>
     <string name="title_activity_favorites">Favorites</string>
     <string name="no_content_available">No reviews available yet.</string>
+    <string name="no_trailers_available">No trailers available</string>
 
     <string-array name="pref_order_movies">
         <item>Most populars</item>

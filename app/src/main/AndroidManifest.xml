@@ -45,6 +45,9 @@
 
         <service android:name=".services.ReminderService"
             android:exported="false"></service>
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

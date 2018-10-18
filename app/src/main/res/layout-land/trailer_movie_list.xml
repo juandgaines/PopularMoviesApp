@@ -5,7 +5,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_margin="8dp"
-    android:background="#757575"
+    android:background="@drawable/list_item_selector"
     android:layout_height="wrap_content">
 
 
@@ -33,7 +33,7 @@
         android:autoSizeTextType="uniform"
         android:maxLines="2"
         android:textStyle="bold"
-        android:textSize="18sp"
+        android:textSize="14sp"
         android:fontFamily="sans-serif"
         android:textColor="@android:color/white"
         tools:text="Nombre de la pelicula"

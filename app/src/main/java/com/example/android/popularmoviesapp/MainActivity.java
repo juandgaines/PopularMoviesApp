@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -95,12 +96,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             }
         });
         GridLayoutManager layoutManager;
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float dpHeight = displayMetrics.heightPixels / displayMetrics.density;
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
 
         int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE ) {
             // In landscape
             layoutManager= new GridLayoutManager(this,5,GridLayoutManager.VERTICAL,false);
-        } else {
+        }else if( dpWidth>=600) {
+            layoutManager= new GridLayoutManager(this,3,GridLayoutManager.VERTICAL,false);
+
+        }
+        else {
             // In portrait
             layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
         }

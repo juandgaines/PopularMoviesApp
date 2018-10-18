@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <ScrollView
+        android:id="@+id/scrollview_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/scrollview_detail"
         android:background="#333333"
         tools:context=".DetailActivity">
 
@@ -22,16 +22,15 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
                 android:autoSizeTextType="uniform"
-                android:fontFamily="sans-serif"
+                android:fontFamily="@font/carter_one"
                 android:maxLines="2"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="48sp"
                 android:textStyle="italic|bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Title of movies" />
@@ -48,71 +47,53 @@
 
             <TextView
                 android:id="@+id/rate_title"
+                style="@style/TitlesActivity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/rate_title"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white"
-                android:textSize="24sp"
-                android:textStyle="bold"
                 app:layout_constraintStart_toEndOf="@+id/movie_picture"
                 app:layout_constraintTop_toBottomOf="@+id/name_movie" />
 
             <TextView
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="14sp"
-                android:textColor="@android:color/white"
                 android:id="@+id/rate_view"
-                tools:text="10/10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layout_constraintStart_toStartOf="@+id/rate_title"
-                app:layout_constraintTop_toBottomOf="@+id/rate_title" />
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/rate_title"
+                app:layout_constraintStart_toEndOf="@+id/rate_title"
+                app:layout_constraintTop_toTopOf="@+id/rate_title"
+                tools:text="10/10" />
 
             <TextView
                 android:id="@+id/release_title"
-                android:layout_width="148dp"
-                android:layout_height="30dp"
+                style="@style/TitlesActivity"
+                android:layout_width="129dp"
+                android:layout_height="29dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/release_title"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@+id/rate_view"
+                app:layout_constraintStart_toStartOf="@+id/rate_title"
                 app:layout_constraintTop_toBottomOf="@+id/rate_view" />
 
             <TextView
-                android:textSize="14sp"
+                android:id="@+id/date_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@android:color/white"
-                android:id="@+id/date_view"
-                tools:text="12/09/2018"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layout_constraintStart_toStartOf="@+id/release_title"
-                app:layout_constraintTop_toBottomOf="@+id/release_title" />
-
-            <TextView
-                android:id="@+id/button"
-                android:gravity="left|bottom"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                android:textColor="@android:color/white"
-                android:layout_weight="3"
-                android:autoSizeTextType="uniform"
-                android:maxLines="1"
-                android:textStyle="bold"
-                android:text="@string/button_mark_as_favorite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layout_constraintStart_toStartOf="@+id/date_view"
-                app:layout_constraintTop_toBottomOf="@+id/date_view" />
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/release_title"
+                app:layout_constraintStart_toEndOf="@+id/release_title"
+                app:layout_constraintTop_toTopOf="@+id/release_title"
+                tools:text="12/09/2018" />
 
             <ImageView
                 android:id="@+id/favoriteButton"
@@ -121,8 +102,11 @@
                 android:layout_gravity="left|center_horizontal"
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
                 android:layout_weight="1"
                 app:layout_constraintBottom_toBottomOf="@+id/button"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/button"
                 app:layout_constraintTop_toTopOf="@+id/button"
                 app:srcCompat="@android:drawable/btn_star_big_off" />
@@ -146,30 +130,25 @@
 
             <TextView
                 android:id="@+id/trailer_title"
+                style="@style/TitlesActivity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/triler_title"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/release_title"
-                app:layout_constraintTop_toBottomOf="@+id/name_movie" />
+                app:layout_constraintStart_toEndOf="@+id/movie_picture"
+                app:layout_constraintTop_toBottomOf="@+id/release_title" />
 
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/trailer_listview"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 app:layout_constraintBottom_toTopOf="@+id/overview_parts"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/trailer_title"
                 app:layout_constraintTop_toBottomOf="@+id/trailer_title">
 
@@ -177,30 +156,26 @@
 
             <TextView
                 android:id="@+id/reviews_title"
+                style="@style/TitlesActivity"
                 android:layout_width="wrap_content"
                 android:layout_height="33dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/reviews_title"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white"
-                android:textSize="24sp"
-                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="@+id/movie_picture"
                 app:layout_constraintTop_toBottomOf="@+id/overview_parts" />
 
             <android.support.v7.widget.RecyclerView
 
                 android:id="@+id/reviews_listview"
-                android:layout_width="558dp"
+                android:layout_width="0dp"
                 android:layout_height="250dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/reviews_title"
                 app:layout_constraintTop_toBottomOf="@+id/reviews_title" />
 
@@ -208,15 +183,46 @@
                 android:id="@+id/empty_view_reviews"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="@string/no_content_available"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@android:color/white"
                 app:layout_constraintStart_toStartOf="@+id/reviews_title"
-                app:layout_constraintTop_toBottomOf="@+id/reviews_listview" />
+                app:layout_constraintTop_toBottomOf="@+id/reviews_title" />
+
+            <TextView
+                android:id="@+id/button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_weight="3"
+                android:autoSizeTextType="uniform"
+                android:gravity="left|bottom"
+                android:maxLines="1"
+                android:text="@string/button_mark_as_favorite"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/date_view"
+                app:layout_constraintStart_toEndOf="@+id/date_view"
+                app:layout_constraintTop_toTopOf="@+id/date_view" />
+
+            <TextView
+                android:id="@+id/empty_view_trailers"
+                android:layout_width="0dp"
+                android:layout_height="19dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:text="@string/no_trailers_available"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/trailer_title"
+                app:layout_constraintTop_toBottomOf="@+id/trailer_title" />
 
         </android.support.constraint.ConstraintLayout>
-
-
 
 
     </ScrollView>

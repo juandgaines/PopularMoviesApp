@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 
@@ -55,13 +56,22 @@ public class FavoritesActivity extends AppCompatActivity implements  FavoriteMov
 
         GridLayoutManager layoutManager2;
 
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float dpHeight = displayMetrics.heightPixels / displayMetrics.density;
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // In landscape
             layoutManager2= new GridLayoutManager(this,5,GridLayoutManager.VERTICAL,false);
-        } else {
+        }
+        else {
             // In portrait
             layoutManager2= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
+        }
+
+        if( orientation != Configuration.ORIENTATION_LANDSCAPE && dpWidth>=600) {
+            layoutManager2= new GridLayoutManager(this,3,GridLayoutManager.VERTICAL,false);
         }
         mRecyclerView.setLayoutManager(layoutManager2);
         mRecyclerView.setHasFixedSize(true);

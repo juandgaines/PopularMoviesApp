@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -124,6 +125,16 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                     //trailersAdapter.setEmptyView(R.id.empty_view_reviews);
                     mBinding.trailerListview.setAdapter(trailersAdapter);
 
+                    if(trailersAdapter.getItemCount()!=0){
+                        mBinding.trailerListview.setVisibility(View.VISIBLE);
+                        mBinding.emptyViewTrailers.setVisibility(View.GONE);
+                    }
+                    else{
+                        mBinding.trailerListview.setVisibility(View.GONE);
+                        mBinding.emptyViewTrailers.setVisibility(View.VISIBLE);
+
+                    }
+
                 }
             });
 
@@ -152,13 +163,17 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
             int orientation = getResources().getConfiguration().orientation;
             LinearLayoutManager layoutManager;
 
+
+
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 // In landscape
                 layoutManager= new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
-            } else {
+            }
+            else {
                 // In portrait
                 layoutManager= new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
             }
+
             LinearLayoutManager layoutManager2= new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
             mBinding.reviewsListview.setLayoutManager(layoutManager2);
             mBinding.trailerListview.setLayoutManager(layoutManager);
