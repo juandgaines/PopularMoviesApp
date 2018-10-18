@@ -3,6 +3,7 @@ package com.example.android.popularmoviesapp;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -52,7 +53,16 @@ public class FavoritesActivity extends AppCompatActivity implements  FavoriteMov
             }
         });
 
-        GridLayoutManager layoutManager2 = new GridLayoutManager(this, 2,LinearLayoutManager.VERTICAL, false);
+        GridLayoutManager layoutManager2;
+
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // In landscape
+            layoutManager2= new GridLayoutManager(this,5,GridLayoutManager.VERTICAL,false);
+        } else {
+            // In portrait
+            layoutManager2= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
+        }
         mRecyclerView.setLayoutManager(layoutManager2);
         mRecyclerView.setHasFixedSize(true);
 

@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -32,22 +33,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     public static final String LOG_TAG=MainActivity.class.getName().toString();
     private FetchViewModel fetchViewModel;
 
-
     @BindView(R.id.my_recycler_view)  RecyclerView mRecyclerView;
     private MovieAdapter mMovieAdapter;
     private FavoriteMovieAdapter mMovieAdapter2;
     @BindView(R.id.pb_loading_indicator)ProgressBar mLoadingIndicator;
     @BindView(R.id.tv_error_message_display)TextView mErrorMessage;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-
         FetchMode();
     }
 
@@ -98,25 +94,26 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 }
             }
         });
+        GridLayoutManager layoutManager;
 
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // In landscape
+            layoutManager= new GridLayoutManager(this,5,GridLayoutManager.VERTICAL,false);
+        } else {
+            // In portrait
+            layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
+        }
 
-        GridLayoutManager layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
 
         mRecyclerView.setLayoutManager(layoutManager);
-
         mRecyclerView.setHasFixedSize(true);
-
-
     }
-
-
     @Override
     public void onClick(Result movieData) {
-
         Context context = this;
         Class destinationClass = DetailActivity.class;
         Intent intent= new Intent(context,destinationClass);
-
         String title = movieData.getTitle();
         String overview = movieData.getOverview();
         String release = movieData.getReleaseDate();
@@ -124,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         double rate = movieData.getVoteAverage();
         String path = movieData.getPosterPath();
         int id_movie=movieData.getId();
-
         MovieData movie = new MovieData(title,overview,rate,release, path,id_movie);
         intent.putExtra(MovieData.PARCELABLE,movie);
         startActivity(intent);
@@ -132,15 +128,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
         if(key.equals(getString(R.string.pref_order_key))){
-
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
             fetchViewModel.loadLiveData(syncConnPref);
-
         }
-
     }
 
     @Override
@@ -180,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessage.setVisibility(View.VISIBLE);
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

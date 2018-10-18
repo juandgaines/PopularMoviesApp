@@ -72,6 +72,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsM
     }
 
 
+
     public class ReviewsMovieViewHolder extends RecyclerView.ViewHolder{
 
         public final ImageView mReviewIcon;

@@ -23,6 +23,7 @@
     <string name="triler_title">Trailers</string>
     <string name="reviews_title">Reviews</string>
     <string name="title_activity_favorites">Favorites</string>
+    <string name="no_content_available">No reviews available yet.</string>
 
     <string-array name="pref_order_movies">
         <item>Most populars</item>

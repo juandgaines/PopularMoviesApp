@@ -42,6 +42,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+
+        <service android:name=".services.ReminderService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

@@ -4,6 +4,8 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.databinding.DataBindingUtil;
 import android.graphics.Movie;
 import android.net.Uri;
 import android.support.annotation.Nullable;
@@ -18,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +30,7 @@ import com.example.android.popularmoviesapp.data.ResultReviews;
 import com.example.android.popularmoviesapp.data.ResultTrailers;
 import com.example.android.popularmoviesapp.data.Review;
 import com.example.android.popularmoviesapp.data.Trailer;
+import com.example.android.popularmoviesapp.databinding.ActivityDetailBinding;
 import com.example.android.popularmoviesapp.network.MovieService;
 import com.example.android.popularmoviesapp.network.RetroClassMainListView;
 import com.squareup.picasso.Picasso;
@@ -52,6 +56,11 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
     @BindView(R.id.favoriteButton)  ImageView mFavortite;
     @BindView(R.id.trailer_listview) RecyclerView mTrailerListView;
     @BindView(R.id.reviews_listview) RecyclerView mReviewsListView;
+    @BindView(R.id.scrollview_detail) ScrollView mScrollView;
+    @BindView(R.id.empty_view_reviews) TextView mEmptyReviewsView;
+
+    ActivityDetailBinding mBinding;
+
 
     private ReviewsAdapter reviewsAdapter;
     private TrailersAdapter trailersAdapter;
@@ -65,6 +74,10 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
         Intent intent=getIntent();
+
+        mBinding=DataBindingUtil.setContentView(this,R.layout.activity_detail);
+
+        //mBinding.
 
         mDb= AppDatabase.getsInstance(getApplicationContext());
 
@@ -90,10 +103,11 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                 @Override
                 public void onChanged(@Nullable MovieData movieData) {
                     if(viewModel.getmCurrentMovie().getValue()!=null){
-                        mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
+
+                        mBinding.favoriteButton.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_on));
                     }
                     else{
-                        mFavortite.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
+                        mBinding.favoriteButton.setImageDrawable(getResources().getDrawable(android.R.drawable.btn_star_big_off));
                     }
 
                     populateUI(id_movie,mTitleStr,mPathStr,mOverviewStr,mRateStr,mDateStr);
@@ -107,7 +121,8 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                 public void onChanged(@Nullable List<Trailer> trailers) {
 
                     trailersAdapter= new TrailersAdapter(DetailActivity.this,trailers);
-                    mTrailerListView.setAdapter(trailersAdapter);
+                    //trailersAdapter.setEmptyView(R.id.empty_view_reviews);
+                    mBinding.trailerListview.setAdapter(trailersAdapter);
 
                 }
             });
@@ -117,20 +132,43 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                 public void onChanged(@Nullable List<Review> reviews) {
 
                     reviewsAdapter= new ReviewsAdapter(reviews);
-                    mReviewsListView.setAdapter(reviewsAdapter);
+                    mBinding.reviewsListview.setAdapter(reviewsAdapter);
+
+                    if(reviewsAdapter.getItemCount()!=0){
+                        mBinding.reviewsListview.setVisibility(View.VISIBLE);
+                        mBinding.emptyViewReviews.setVisibility(View.GONE);
+                    }
+                    else{
+                        mBinding.reviewsListview.setVisibility(View.GONE);
+                        mBinding.emptyViewReviews.setVisibility(View.VISIBLE);
+
+                    }
+
 
                 }
             });
 
 
-            LinearLayoutManager layoutManager= new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
-            LinearLayoutManager layoutManager2= new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
-            mReviewsListView.setLayoutManager(layoutManager);
-            mTrailerListView.setLayoutManager(layoutManager2);
-            mTrailerListView.setHasFixedSize(true);
-            mReviewsListView.setHasFixedSize(true);
+            int orientation = getResources().getConfiguration().orientation;
+            LinearLayoutManager layoutManager;
 
-            mFavortite.setOnClickListener(new View.OnClickListener() {
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                // In landscape
+                layoutManager= new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+            } else {
+                // In portrait
+                layoutManager= new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
+            }
+            LinearLayoutManager layoutManager2= new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+            mBinding.reviewsListview.setLayoutManager(layoutManager2);
+            mBinding.trailerListview.setLayoutManager(layoutManager);
+
+
+
+            mBinding.trailerListview.setHasFixedSize(true);
+            mBinding.reviewsListview.setHasFixedSize(true);
+
+            mBinding.favoriteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View view) {
 
@@ -153,10 +191,18 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                 }
             });
 
+
         }
+
+
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mScrollView.scrollTo(0,0);
+    }
 
     @Override
     public void onClick(Trailer trailerData) {
@@ -175,30 +221,31 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
     }
 
     private void  populateUI(int id_movie,String mTitleStr,String mPathStr,String mOverviewStr,String mRateStr, String mDateStr){
-        mMovieTitleDisplay.setText(mTitleStr);
+        mBinding.nameMovie.setText(mTitleStr);
+
         Log.v(LOG_TAG,"value of date "+mDateStr);
         if(mDateStr==null|| mDateStr.equals("")) {
             //mDateStr= getResources().getString(R.string.error_date_message);
-            mMovieReleaseDisplay.setText(getResources().getString(R.string.error_date_message));
+            mBinding.dateView.setText(getResources().getString(R.string.error_date_message));
         }
         else{
-            mMovieReleaseDisplay.setText(mDateStr);
+            mBinding.dateView.setText(mDateStr);
         }
-
 
         Log.v(LOG_TAG,"value of rate "+mRateStr);
         if(mRateStr!=null || mRateStr.equals("")){
-            mMovieRateDisplay.setText(mRateStr+"/10");
+            mBinding.rateView.setText(mRateStr+"/10");
         }
         else{
-            mMovieRateDisplay.setText(getResources().getString(R.string.error_rate_message));
+            mBinding.rateView.setText(getResources().getString(R.string.error_rate_message));
         }
         Log.v(LOG_TAG,"value of overview "+mOverviewStr);
         if(mOverviewStr==null|| mOverviewStr.equals("")){
-            mMovieOverviewDisplay.setText(getResources().getString(R.string.error_overview_message));
+
+            ((TextView)mBinding.overviewParts.findViewById(R.id.Overview_view)).setText(getResources().getString(R.string.error_overview_message));
         }
         else{
-            mMovieOverviewDisplay.setText(mOverviewStr);
+            ((TextView)mBinding.overviewParts.findViewById(R.id.Overview_view)).setText(mOverviewStr);
         }
 
 
@@ -210,13 +257,13 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                     .load(MovieData.BASE_LINK +mPathStr)
                     .resize(600,1000)
                     .centerInside()
-                    .into(mMoviePostDisplay);
+                    .into(mBinding.moviePicture);
         }
         else{
             Picasso.with(this)
                     .load(R.drawable.not_found)
                     .resize(600,800)
-                    .into(mMoviePostDisplay);
+                    .into(mBinding.moviePicture);
         }
     }
 }
