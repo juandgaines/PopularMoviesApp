@@ -36,12 +36,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".FavoritesActivity"
-            android:label="@string/title_activity_favorites">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
 
         <service android:name=".services.ReminderService"
             android:exported="false"></service>

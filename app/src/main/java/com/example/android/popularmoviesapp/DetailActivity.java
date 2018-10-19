@@ -49,20 +49,7 @@ import retrofit2.Response;
 
 public class DetailActivity extends AppCompatActivity implements TrailersAdapter.TrailerAdapterOnClickHandler{
     private static final String LOG_TAG= DetailActivity.class.getName().toString();
-    @BindView(R.id.name_movie) TextView mMovieTitleDisplay;
-    @BindView(R.id.Overview_view)  TextView mMovieOverviewDisplay;
-    @BindView(R.id.rate_view)  TextView mMovieRateDisplay;
-    @BindView(R.id.date_view)  TextView mMovieReleaseDisplay;
-    @BindView(R.id.movie_picture)  ImageView mMoviePostDisplay;
-    @BindView(R.id.favoriteButton)  ImageView mFavortite;
-    @BindView(R.id.trailer_listview) RecyclerView mTrailerListView;
-    @BindView(R.id.reviews_listview) RecyclerView mReviewsListView;
-    @BindView(R.id.scrollview_detail) ScrollView mScrollView;
-    @BindView(R.id.empty_view_reviews) TextView mEmptyReviewsView;
-
     ActivityDetailBinding mBinding;
-
-
     private ReviewsAdapter reviewsAdapter;
     private TrailersAdapter trailersAdapter;
 
@@ -216,7 +203,7 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
     @Override
     protected void onResume() {
         super.onResume();
-        mScrollView.scrollTo(0,0);
+        mBinding.scrollviewDetail.scrollTo(0,0);
     }
 
     @Override

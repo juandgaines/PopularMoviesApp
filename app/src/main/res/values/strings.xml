@@ -29,11 +29,13 @@
     <string-array name="pref_order_movies">
         <item>Most populars</item>
         <item>Best rated</item>
+        <item>Favorites</item>
 
     </string-array>
     <string-array name="pref_order_peliculas_values">
         <item>popular</item>
         <item>top_rated</item>
+        <item>favorites</item>
 
     </string-array>
 
