@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.graphics.Movie;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -52,7 +53,10 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
     ActivityDetailBinding mBinding;
     private ReviewsAdapter reviewsAdapter;
     private TrailersAdapter trailersAdapter;
-
+    public static final String KEY_RECYCLERVIEW_1="position1";
+    public static final String KEY_RECYCLERVIEW_2="position2";
+    private Parcelable mRecyclerViewState1;
+    private Parcelable mRecyclerViewState2;
 
     AppDatabase mDb;
     @Override
@@ -161,7 +165,17 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
                 layoutManager= new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
             }
 
+            if (mRecyclerViewState1 != null) {
+                layoutManager.onRestoreInstanceState(mRecyclerViewState1);
+            }
+
             LinearLayoutManager layoutManager2= new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+
+            if (mRecyclerViewState2 != null) {
+                layoutManager2.onRestoreInstanceState(mRecyclerViewState2);
+            }
+
+
             mBinding.reviewsListview.setLayoutManager(layoutManager2);
             mBinding.trailerListview.setLayoutManager(layoutManager);
 
@@ -198,6 +212,27 @@ public class DetailActivity extends AppCompatActivity implements TrailersAdapter
 
 
 
+    }
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelable(KEY_RECYCLERVIEW_1,mBinding.trailerListview.getLayoutManager().onSaveInstanceState());
+        savedInstanceState.putParcelable(KEY_RECYCLERVIEW_2, mBinding.reviewsListview.getLayoutManager().onSaveInstanceState());// get current recycle view position here.
+
+    }
+
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if(savedInstanceState!=null){
+            mRecyclerViewState1 = savedInstanceState.getParcelable(KEY_RECYCLERVIEW_1);
+            mRecyclerViewState2 = savedInstanceState.getParcelable(KEY_RECYCLERVIEW_2);
+        }
     }
 
     @Override

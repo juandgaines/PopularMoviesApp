@@ -7,7 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +37,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         ,SharedPreferences.OnSharedPreferenceChangeListener,FavoriteMovieAdapter.MovieAdapterOnClickHandler {
 
     public static final String LOG_TAG=MainActivity.class.getName().toString();
+    public static final String KEY_RECYCLERVIEW_1="position1";
+    public static final String KEY_RECYCLERVIEW_2="position2";
+
+    private Parcelable mRecyclerViewState1;
+    private Parcelable mRecyclerViewState2;
+
     private FetchViewModel fetchViewModel;
     AppDatabase mDb;
 
@@ -53,6 +61,27 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         FetchMode();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelable(KEY_RECYCLERVIEW_1, mRecyclerView.getLayoutManager().onSaveInstanceState());
+        savedInstanceState.putParcelable(KEY_RECYCLERVIEW_2, mRecyclerView2.getLayoutManager().onSaveInstanceState());// get current recycle view position here.
+
+    }
+
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if(savedInstanceState!=null){
+            mRecyclerViewState1 = savedInstanceState.getParcelable(KEY_RECYCLERVIEW_1);
+            mRecyclerViewState2 = savedInstanceState.getParcelable(KEY_RECYCLERVIEW_2);
+        }
+    }
 
     void FetchMode(){
         PreferenceManager.setDefaultValues(this,R.xml.pref_general,false);
@@ -62,14 +91,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
         String apiKey = BuildConfig.OPEN_THE_MOVIE_DB_API_KEY;
 
-        if(!syncConnPref.equals("favorites")) {
+
+        Resources res = getResources();
+        String[] moviesValues = res.getStringArray(R.array.pref_order_peliculas_values);
+        String value= moviesValues[2];
+
+        if(!syncConnPref.equals(value)) {
             mErrorMessage.setVisibility(View.INVISIBLE);
             mRecyclerView.setVisibility(View.VISIBLE);
+            mLoadingIndicator.setVisibility(View.VISIBLE);
             mRecyclerView2.setVisibility(View.GONE);
         }
         else{
             mErrorMessage.setVisibility(View.INVISIBLE);
             mRecyclerView.setVisibility(View.GONE);
+
             mRecyclerView2.setVisibility(View.VISIBLE);
         }
 
@@ -81,14 +117,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         final int height = size.y;
 
         fetchViewModel= ViewModelProviders.of(this).get(FetchViewModel.class);
-
-
-
-
-
-
-
-
 
         GridLayoutManager layoutManager2;
 
@@ -110,6 +138,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         if( orientation != Configuration.ORIENTATION_LANDSCAPE && dpWidth>=600) {
             layoutManager2= new GridLayoutManager(this,3,GridLayoutManager.VERTICAL,false);
+        }
+
+
+        if (mRecyclerViewState2 != null) {
+            layoutManager2.onRestoreInstanceState(mRecyclerViewState2);
         }
         mRecyclerView2.setLayoutManager(layoutManager2);
         mRecyclerView2.setHasFixedSize(true);
@@ -166,7 +199,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             // In portrait
             layoutManager= new GridLayoutManager(this,2,GridLayoutManager.VERTICAL,false);
         }
-
+        if (mRecyclerViewState1 != null) {
+            layoutManager.onRestoreInstanceState(mRecyclerViewState1);
+        }
 
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
@@ -207,9 +242,15 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             String syncConnPref = sharedPref.getString(getResources().getString(R.string.pref_order_key),"");
-            if(!syncConnPref.equals("favorites")) {
+
+            Resources res = getResources();
+            String[] moviesValues = res.getStringArray(R.array.pref_order_peliculas_values);
+            String value= moviesValues[2];
+
+            if(!syncConnPref.equals(value)) {
                 mErrorMessage.setVisibility(View.INVISIBLE);
                 mRecyclerView.setVisibility(View.VISIBLE);
+                mLoadingIndicator.setVisibility(View.VISIBLE);
                 mRecyclerView2.setVisibility(View.GONE);
                 fetchViewModel.loadLiveData(syncConnPref);
             }
